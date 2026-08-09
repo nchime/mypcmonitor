@@ -10,6 +10,18 @@ export interface SchedulerConfig {
 export class CollectorScheduler {
   private timers = new Map<MetricChannel, NodeJS.Timeout>();
   private cancelled = new Set<MetricChannel>();
+  private scale = 1;
+
+  /** 현재 적용된 배율 (r 키로 순환: 1 → 2 → 4 → 0.5) */
+  getScale(): number {
+    return this.scale;
+  }
+
+  /** 수집 주기 전체를 배율만큼 스케일한다 (다음 틱부터 적용). */
+  setScale(scale: number): void {
+    if (scale <= 0) return;
+    this.scale = scale;
+  }
 
   start(config: SchedulerConfig, initialDelayMs = 0): void {
     this.stop(config.channel);
@@ -24,7 +36,7 @@ export class CollectorScheduler {
         }
         if (!this.cancelled.has(config.channel)) {
           const elapsed = Date.now() - start;
-          schedule(Math.max(0, config.intervalMs - elapsed));
+          schedule(Math.max(0, config.intervalMs * this.scale - elapsed));
         }
       }, delay);
       this.timers.set(config.channel, timer);

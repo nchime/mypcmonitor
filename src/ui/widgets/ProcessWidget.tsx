@@ -6,7 +6,8 @@ import { colorForPercent, formatBytes, pad } from '../format.js';
 interface ProcessWidgetProps {
   snapshot: ProcessSnapshot | null;
   height: number;
-  onExit: () => void;
+  /** true면 키보드 입력을 무시한다 (도움말 오버레이 등이 열린 경우). */
+  inputDisabled?: boolean;
 }
 
 const SORT_COLUMN: Record<ProcessSortKey, { label: string; value: (p: ProcessEntry) => number | string }> = {
@@ -18,7 +19,7 @@ const SORT_COLUMN: Record<ProcessSortKey, { label: string; value: (p: ProcessEnt
 
 const SORT_KEYS: ProcessSortKey[] = ['cpu', 'mem', 'pid', 'name'];
 
-export function ProcessWidget({ snapshot, height, onExit }: ProcessWidgetProps) {
+export function ProcessWidget({ snapshot, height, inputDisabled = false }: ProcessWidgetProps) {
   const [sort, setSort] = useState<ProcessSortKey>('cpu');
   const [offset, setOffset] = useState(0);
   const contentHeight = Math.max(1, height - 3);
@@ -43,14 +44,13 @@ export function ProcessWidget({ snapshot, height, onExit }: ProcessWidgetProps) 
   }, [rows.length, offset, contentHeight]);
 
   useInput((input, key) => {
+    if (inputDisabled) return;
     if (input === '1' || input === '2' || input === '3' || input === '4') {
       setSort(SORT_KEYS[Number(input) - 1] ?? 'cpu');
     } else if (key.downArrow) {
       setOffset((o) => Math.min(o + 1, Math.max(0, rows.length - contentHeight)));
     } else if (key.upArrow) {
       setOffset((o) => Math.max(0, o - 1));
-    } else if (input.toLowerCase() === 'q') {
-      onExit();
     }
   });
 

@@ -8,14 +8,20 @@ import { App } from './ui/App.js';
 const store = new MonitorStore();
 const scheduler = createMonitor(store);
 
-const { waitUntilExit } = render(<App store={store} />);
+const { waitUntilExit } = render(
+  <App
+    store={store}
+    onScaleChange={(s) => scheduler.setScale(s)}
+    onQuit={() => void handleSignal()}
+  />,
+);
 
-async function handleSignal(): Promise<void> {
+function handleSignal(): void {
   scheduler.stopAll();
   process.exit(0);
 }
 
-process.on('SIGINT', () => void handleSignal());
-process.on('SIGTERM', () => void handleSignal());
+process.on('SIGINT', () => handleSignal());
+process.on('SIGTERM', () => handleSignal());
 
 await waitUntilExit();

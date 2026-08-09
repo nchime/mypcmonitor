@@ -2,6 +2,7 @@
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License: MIT"/></a>
   <a href="#"><img src="https://img.shields.io/badge/version-1.0.0-brightgreen?style=flat-square" alt="version 1.0.0"/></a>
+<br/>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/language-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/></a>
   <a href="#"><img src="https://img.shields.io/badge/node-%3E%3D18-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js >= 18"/></a>
   <a href="https://github.com/vadimdemedes/ink"><img src="https://img.shields.io/badge/built%20with-Ink%207%20(React%20TUI)-cyan?style=flat-square" alt="Built with Ink"/></a>
@@ -11,6 +12,7 @@
   <a href="https://github.com/nchime/mypcmonitor"><img src="https://img.shields.io/github/repo-size/nchime/mypcmonitor?style=flat-square&label=repo%20size" alt="repo size"/></a>
   <a href="https://github.com/nchime/mypcmonitor"><img src="https://img.shields.io/badge/commit%20by-git--master-red?style=flat-square" alt="git-master"/></a>
 </p>
+
 
 <!-- 스타/이슈/최근 커밋/저장소 크기 배지는 GitHub에 푸시된 후 자동 반영됩니다 -->
 터미널에서 실행하는 로컬 PC 실시간 시스템 모니터링 대시보드 CLI.
@@ -73,11 +75,14 @@ pnpm build
 
 ## 사용법
 
-### 개발 모드 (파일 변경 시 자동 재시작)
+### 개발 모드 (소스 직접 실행)
 
 ```bash
 pnpm dev
 ```
+
+> ⚠️ `tsx watch`(`pnpm dev:watch`)는 키 입력을 감지하면 프로세스를 재시작하므로
+> stdin(raw key)을 직접 사용하는 이 TUI 앱과 호환되지 않습니다. 개발 시에는 `pnpm dev`를 사용하세요.
 
 ### 프로덕션 빌드 실행
 
@@ -120,7 +125,8 @@ pnpm build
 | 스크립트 | 설명 |
 |---|---|
 | `pnpm build` | TypeScript → `dist/` 컴파일 |
-| `pnpm dev` | tsx watch 방식 개발 서버 |
+| `pnpm dev` | tsx로 소스 직접 실행 (권장, watch 아님) |
+| `pnpm dev:watch` | tsx watch 개발 서버 (TUI와 비호환, 주의) |
 | `pnpm start` | 빌드 결과 실행 |
 | `pnpm typecheck` | 타입 오류 검사 (실행하지 않음) |
 
