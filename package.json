@@ -1,0 +1,33 @@
+{
+  "name": "mypcmonitor",
+  "version": "1.0.0",
+  "description": "Terminal real-time system monitoring dashboard for local PC (CPU/Memory/Disk/Network/Processes)",
+  "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "bin": {
+    "mypcmonitor": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.tsx",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.3",
+  "dependencies": {
+    "ink": "7.1.1",
+    "react": "19.2.8",
+    "systeminformation": "5.33.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "tsx": "^4.23.11",
+    "typescript": "5.9.3"
+  }
+}
