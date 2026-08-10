@@ -18,11 +18,19 @@ const textArtLines = [
 export function IntroScreen({ onAnyKey }: IntroScreenProps) {
   const { stdout } = useStdout();
   const height = stdout.rows ?? 24;
+  const onAnyKeyRef = React.useRef(onAnyKey);
+  onAnyKeyRef.current = onAnyKey;
   
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      onAnyKeyRef.current();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useInput(() => {
-    // 인트로에서는 아무 키나 누르면 메인으로 이동 (터미널마다 Enter 바이트가
-    // 다르므로 특정 키에 의존하지 않는다).
-    onAnyKey();
+    // 인트로에서는 아무 키나 누르거나 3초가 지나면 메인으로 이동
+    onAnyKeyRef.current();
   });
 
   const paddingTop = Math.max(0, Math.floor((height - textArtLines.length) / 2));
@@ -37,7 +45,7 @@ export function IntroScreen({ onAnyKey }: IntroScreenProps) {
         ))}
         <Box marginTop={1} flexDirection="column" alignItems="center">
           <Text bold color="cyan">v{APP_VERSION}</Text>
-          <Text color="gray">아무 키나 누르면 시작합니다</Text>
+          <Text color="gray">아무 키나 누르거나 3초 후 메인 화면으로 이동합니다</Text>
           </Box>
         </Box>
       <Box width="100%" justifyContent="flex-end" marginRight={1}>

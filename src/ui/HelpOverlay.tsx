@@ -90,8 +90,7 @@ export function HelpOverlay({ selectedKey, onClose }: HelpOverlayProps) {
       borderStyle="round"
       borderColor="cyan"
       paddingX={1}
-      paddingY={1}
-      backgroundColor="gray"
+      paddingY={0}
     >
       <Text bold color="cyan">
         도움말 — MyPCMonitor 단축키
@@ -105,13 +104,13 @@ export function HelpOverlay({ selectedKey, onClose }: HelpOverlayProps) {
                 {s.keys}
               </Text>
             </Box>
-            <Text>
+            <Text color="white">
               {s.label} <Text color="gray">— {s.desc}</Text>
             </Text>
           </Box>
         ))}
       </Box>
-      <Box marginTop={1} borderStyle="single" borderColor="magenta" paddingX={1} paddingY={1}>
+      <Box marginTop={1} borderStyle="single" borderColor="magenta" paddingX={1} paddingY={0}>
         {selected ? (
           <Text>
             <Text color="yellow" bold>
@@ -121,13 +120,13 @@ export function HelpOverlay({ selectedKey, onClose }: HelpOverlayProps) {
             <Text color="white">{selected.detail}</Text>
           </Text>
         ) : (
-          <Text color="gray" dimColor>
+          <Text color="gray">
             (키를 눌러 상세보기 — 예: r을 누르면 주기 변경 설명)
           </Text>
         )}
       </Box>
       <Box marginTop={1}>
-        <Text color="cyan">ESC / h · ? — 닫기</Text>
+        <Text color="cyan" bold>ESC / h · ? — 닫기</Text>
       </Box>
     </Box>
   );

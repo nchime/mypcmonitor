@@ -7,7 +7,7 @@ import { MemoryWidget } from './widgets/MemoryWidget.js';
 import { DiskWidget } from './widgets/DiskWidget.js';
 import { NetworkWidget } from './widgets/NetworkWidget.js';
 import { ProcessWidget } from './widgets/ProcessWidget.js';
-import { formatDuration } from './format.js';
+import { formatDuration, formatDateTime } from './format.js';
 import { IntroScreen } from './IntroScreen.js';
 import { HelpOverlay } from './HelpOverlay.js';
 import { APP_VERSION } from '../constants.js';
@@ -32,6 +32,7 @@ let introDone = false;
 
 export function App({ store, onScaleChange, onQuit }: AppProps) {
   const [snapshot, setSnapshot] = useState<StoreSnapshot>(() => store.snapshot());
+  const [now, setNow] = useState<Date>(() => new Date());
   const [screen, setScreen] = useState<'intro' | 'main'>(() => (introDone ? 'main' : 'intro'));
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpSel, setHelpSel] = useState<string | null>(null);
@@ -47,13 +48,29 @@ export function App({ store, onScaleChange, onQuit }: AppProps) {
   pausedRef.current = paused;
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let updateTimer: NodeJS.Timeout | null = null;
+
+    const scheduleUpdate = () => {
+      if (pausedRef.current || updateTimer !== null) return;
+      updateTimer = setTimeout(() => {
+        setSnapshot(store.snapshot());
+        updateTimer = null;
+      }, 100);
+    };
+
     const channels = ['cpu', 'memory', 'disk', 'network', 'processes'] as const;
-    const unsubscribe = channels.map((ch) =>
-      store.onChannel(ch, () => {
-        if (!pausedRef.current) setSnapshot(store.snapshot());
-      }),
-    );
-    return () => unsubscribe.forEach((fn) => fn());
+    const unsubscribe = channels.map((ch) => store.onChannel(ch, scheduleUpdate));
+    return () => {
+      unsubscribe.forEach((fn) => fn());
+      if (updateTimer !== null) clearTimeout(updateTimer);
+    };
   }, [store]);
 
   useInput((input, key) => {
@@ -102,16 +119,25 @@ export function App({ store, onScaleChange, onQuit }: AppProps) {
   }, [scaleIdx]);
 
   const height = stdout.rows ?? 24;
+  // 전체 터미널 높이에서 헤더(1줄) + 푸터(1~2줄) + 여백(1줄)을 뺀 높이를 ProcessWidget에 전달
+  const contentHeight = Math.max(5, height - (showVersion ? 4 : 3));
 
   if (screen === 'intro') {
-    return <IntroScreen onAnyKey={() => { introDone = true; setScreen('main'); }} />;
+    return (
+      <IntroScreen
+        onAnyKey={() => {
+          introDone = true;
+          setScreen('main');
+        }}
+      />
+    );
   }
   return (
-
-    <Box flexDirection="column" padding={1}>
+    <Box flexDirection="column" height={height} paddingX={1} paddingY={0} overflow="hidden">
       <Text bold color="white">
         {' '}
         PC 모니터{' '}
+        <Text color="cyan">[{formatDateTime(now)}]</Text>{' '}
         <Text color="gray">
           | Uptime {formatDuration(snapshot.uptimeSec)}
           | 배율 {SCALE_LABEL[scale] ?? '?'}
@@ -119,7 +145,7 @@ export function App({ store, onScaleChange, onQuit }: AppProps) {
           | q 종료
         </Text>
       </Text>
-      <Box flexDirection="row" width="100%">
+      <Box flexDirection="row" width="100%" flexGrow={1}>
         <Box flexDirection="column" width={55}>
           <CpuWidget snapshot={snapshot.cpu} history={store.cpuHistory} />
           <MemoryWidget snapshot={snapshot.memory} history={store.memHistory} />
@@ -133,7 +159,7 @@ export function App({ store, onScaleChange, onQuit }: AppProps) {
         <Box flexDirection="column" flexGrow={1} marginLeft={1}>
           <ProcessWidget
             snapshot={snapshot.processes}
-            height={height}
+            height={contentHeight}
             inputDisabled={helpOpen}
           />
         </Box>
