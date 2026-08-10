@@ -24,6 +24,7 @@ React 기반 TUI 프레임워크 **Ink**로 제작된 터미널 UI와 **systemin
 
 | 위젯 | 표시 항목 |
 |---|---|
+| **시스템 & 배터리** | OS(디스트로/플랫폼, 버전, 아키텍처), 배터리 충전 잔량(%), 충전/방전 상태(⚡/🔋), AC 연결 여부 |
 | **CPU** | 사용률 스파크라인, 전체 사용률 막대, 코어별 사용률, 현재 클럭(GHz), 온도(macOS M 시리즈는 미지원) |
 | **메모리** | 사용률 스파크라인, 사용률 막대(압박 기준), 사용/전체, 스왑 사용량 |
 | **디스크** | 읽기/쓰기 속도, 마운트(볼륨)별 용량 사용률 최대 3개 |
@@ -34,12 +35,19 @@ React 기반 TUI 프레임워크 **Ink**로 제작된 터미널 UI와 **systemin
 
 | 키 | 동작 |
 |---|---|
-| `1` | CPU 기준 정렬 |
-| `2` | 메모리 기준 정렬 |
-| `3` | PID 기준 정렬 |
-| `4` | 이름 기준 정렬 |
+| `t` | 컬러 테마 변경 (Dracula → Nord → Monokai → Solarized Dark) |
+| `m` / `Tab` | 뷰 모드 전환 (종합 Grid → 미니 Compact → CPU 집중 → 프로세스 집중) |
+| `1` | 프로세스 CPU 기준 정렬 |
+| `2` | 프로세스 메모리 기준 정렬 |
+| `3` | 프로세스 PID 기준 정렬 |
+| `4` | 프로세스 이름 기준 정렬 |
 | `↑` / `↓` | 프로세스 목록 스크롤 |
-| `q` | 종료 |
+| `h` / `?` | 단축키 도움말 패널 토글 |
+| `p` | 실시간 갱신 일시정지 / 재개 |
+| `r` | 데이터 수집 주기 배율 변경 (1x → 2x → 4x → 0.5x) |
+| `v` | 버전 정보 표시 |
+| `Ctrl+L` | 터미널 화면 리셋 |
+| `q` / `ESC` | 프로그램 종료 (도움말이 열려 있으면 도움말 닫기) |
 | `Ctrl+C` | 종료 |
 
 ---
@@ -47,7 +55,7 @@ React 기반 TUI 프레임워크 **Ink**로 제작된 터미널 UI와 **systemin
 ## 요구사항
 
 - **Node.js 18 이상** (권장: v20 LTS+)
-- 터미널 크기 **최소 100x30** 권장 (더 작아도 동작하되 레이아웃이 좁아질 수 있음)
+- 터미널 크기 **최소 100x30** 권장 (터미널 높이에 맞게 반응형 자동 조절)
 - 256색 이상 지원 터미널 (대부분의 기본 터미널/iTerm2/Windows Terminal OK)
 - 데이터 수집이 **sudo 없이** 동작 (온도 제외 — 아래 "제한사항" 참조)
 
@@ -136,8 +144,9 @@ pnpm build
 
 ```
 src/
-├── index.tsx            # 엔트리 (데이터 수집 시작 + Ink 렌더)
-├── types.ts             # 메트릭 스냅샷 타입 정의
+├── index.tsx            # 엔트리 (대체 화면 버퍼 + Ink 렌더)
+├── types.ts             # 메트릭 스냅샷, 테마 및 뷰모드 타입 정의
+├── constants.ts         # 앱 상수
 ├── core/
 │   ├── store.ts         # 중앙 스토어 (EventEmitter pub/sub + 히스토리 링 버퍼 관리)
 │   └── ringBuffer.ts    # 스파크라인용 원형 히스토리 버퍼
@@ -148,13 +157,18 @@ src/
 │   ├── memory.ts        # mem
 │   ├── disk.ts          # fsSize + fsStats
 │   ├── network.ts       # networkStats
-│   └── processes.ts     # processes
+│   ├── processes.ts     # processes
+│   └── system.ts        # battery + osInfo + time
 └── ui/
-    ├── App.tsx          # 대시보드 레이아웃 조립
-    ├── format.ts        # 바이트/속도/시간 포맷, 퍼센트 색상 규칙
+    ├── App.tsx          # 대시보드 메인 레이아웃 & 뷰/테마 제어
+    ├── format.ts        # 날짜/바이트/속도/시간 포맷, 퍼센트 색상 규칙
+    ├── theme.ts         # Dracula, Nord, Monokai, Solarized Dark 색상 팔레트
     ├── BarGauge.tsx     # ██████░░ 막대 게이지
     ├── Sparkline.tsx    # ▁▂▃▄▅▆▇█ 스파크라인
+    ├── IntroScreen.tsx  # 인트로 아스키 아트 화면 (3초 자동 전환)
+    ├── HelpOverlay.tsx  # 단축키 도움말 가이드 패널
     └── widgets/
+        ├── SystemWidget.tsx    # OS & 배터리 상태 위젯
         ├── CpuWidget.tsx
         ├── MemoryWidget.tsx
         ├── DiskWidget.tsx
@@ -175,8 +189,10 @@ src/
 | 네트워크 | 1s |
 | 디스크 | 2s |
 | 프로세스 | 3s |
+| 배터리 | 5s |
+| 시스템 정보 | 10s |
 
-수집된 데이터는 `MonitorStore`(EventEmitter)에 이벤트로 방출되고, React 컴포넌트는 구독하여 **리렌더에 필요한 스냅샷만 취득** 받습니다. 스파크라인은 120포인트 원형 버퍼에 유지됩니다.
+수집된 데이터는 `MonitorStore`(EventEmitter)에 이벤트로 방출되고, React 컴포넌트는 구독하여 100ms 단위로 렌더링을 배치(Batch) 처리하여 **터미널 깜빡임을 최소화**합니다. 스파크라인은 120포인트 원형 버퍼에 유지됩니다.
 
 ---
 
