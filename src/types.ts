@@ -70,7 +70,42 @@ export interface HistoryPoint {
   value: number;
 }
 
-export type MetricChannel = 'cpu' | 'memory' | 'disk' | 'network' | 'processes';
+export interface BatterySnapshot extends Timestamped {
+  hasBattery: boolean;
+  isCharging: boolean;
+  percent: number;
+  acConnected: boolean;
+  type: string;
+  maxCapacity: number;
+  currentCapacity: number;
+}
+
+export interface SystemSnapshot extends Timestamped {
+  platform: string;
+  distro: string;
+  release: string;
+  arch: string;
+  hostname: string;
+  uptimeSec: number;
+}
+
+export type MetricChannel = 'cpu' | 'memory' | 'disk' | 'network' | 'processes' | 'battery' | 'system';
+
+export type ThemeName = 'dracula' | 'nord' | 'monokai' | 'solarizedDark';
+
+export interface ThemePalette {
+  name: string;
+  primary: string; // cyan, blue, magenta, etc.
+  secondary: string;
+  success: string;
+  warning: string;
+  danger: string;
+  text: string;
+  subtext: string;
+  border: string;
+}
+
+export type ViewMode = 'grid' | 'compact' | 'cpu' | 'process';
 
 export interface StoreSnapshot {
   cpu: CpuSnapshot | null;
@@ -78,5 +113,7 @@ export interface StoreSnapshot {
   disk: DiskSnapshot | null;
   network: NetworkSnapshot | null;
   processes: ProcessSnapshot | null;
+  battery: BatterySnapshot | null;
+  system: SystemSnapshot | null;
   uptimeSec: number;
 }

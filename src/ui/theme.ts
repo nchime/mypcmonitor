@@ -1,0 +1,48 @@
+import type { ThemeName, ThemePalette } from '../types.js';
+
+export const THEMES: Record<ThemeName, ThemePalette> = {
+  dracula: {
+    name: 'Dracula',
+    primary: 'cyan',
+    secondary: 'magenta',
+    success: 'green',
+    warning: 'yellow',
+    danger: 'red',
+    text: 'white',
+    subtext: 'gray',
+    border: 'cyan',
+  },
+  nord: {
+    name: 'Nord',
+    primary: 'blue',
+    secondary: 'cyan',
+    success: 'green',
+    warning: 'yellow',
+    danger: 'red',
+    text: 'white',
+    subtext: 'gray',
+    border: 'blue',
+  },
+  monokai: {
+    name: 'Monokai',
+    primary: 'yellow',
+    secondary: 'magenta',
+    success: 'green',
+    warning: 'yellow',
+    danger: 'red',
+    text: 'white',
+    subtext: 'gray',
+    border: 'yellow',
+  },
+  solarizedDark: {
+    name: 'Solarized Dark',
+    primary: 'green',
+    secondary: 'yellow',
+    success: 'cyan',
+    warning: 'yellow',
+    danger: 'red',
+    text: 'white',
+    subtext: 'gray',
+    border: 'green',
+  },
+};

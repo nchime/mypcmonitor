@@ -6,6 +6,8 @@ import type {
   NetworkSnapshot,
   ProcessSnapshot,
   CpuSnapshot,
+  BatterySnapshot,
+  SystemSnapshot,
   StoreSnapshot,
 } from '../types.js';
 import { RingBuffer } from './ringBuffer.js';
@@ -23,6 +25,8 @@ export class MonitorStore extends EventEmitter {
   private _disk: DiskSnapshot | null = null;
   private _network: NetworkSnapshot | null = null;
   private _processes: ProcessSnapshot | null = null;
+  private _battery: BatterySnapshot | null = null;
+  private _system: SystemSnapshot | null = null;
 
   get cpu(): CpuSnapshot | null {
     return this._cpu;
@@ -42,6 +46,14 @@ export class MonitorStore extends EventEmitter {
 
   get processes(): ProcessSnapshot | null {
     return this._processes;
+  }
+
+  get battery(): BatterySnapshot | null {
+    return this._battery;
+  }
+
+  get system(): SystemSnapshot | null {
+    return this._system;
   }
 
   setCpu(s: CpuSnapshot | null): void {
@@ -78,6 +90,16 @@ export class MonitorStore extends EventEmitter {
     this.emit('processes', s);
   }
 
+  setBattery(s: BatterySnapshot | null): void {
+    this._battery = s;
+    this.emit('battery', s);
+  }
+
+  setSystem(s: SystemSnapshot | null): void {
+    this._system = s;
+    this.emit('system', s);
+  }
+
   snapshot(): StoreSnapshot {
     return {
       cpu: this._cpu,
@@ -85,7 +107,9 @@ export class MonitorStore extends EventEmitter {
       disk: this._disk,
       network: this._network,
       processes: this._processes,
-      uptimeSec: Math.floor(process.uptime()),
+      battery: this._battery,
+      system: this._system,
+      uptimeSec: this._system?.uptimeSec ?? Math.floor(process.uptime()),
     };
   }
 

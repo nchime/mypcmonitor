@@ -5,6 +5,7 @@ import { collectMemory } from './memory.js';
 import { collectDisk } from './disk.js';
 import { collectNetwork } from './network.js';
 import { collectProcesses } from './processes.js';
+import { collectBattery, collectSystem } from './system.js';
 
 export const POLL_INTERVALS = {
   cpu: 500,
@@ -12,6 +13,8 @@ export const POLL_INTERVALS = {
   network: 1000,
   disk: 2000,
   processes: 3000,
+  battery: 5000,
+  system: 10000,
 } as const;
 
 export function createMonitor(store: MonitorStore): CollectorScheduler {
@@ -37,6 +40,16 @@ export function createMonitor(store: MonitorStore): CollectorScheduler {
   scheduler.start(
     { intervalMs: POLL_INTERVALS.processes, channel: 'processes', collect: () => collectProcesses(store) },
     200,
+  );
+
+  scheduler.start(
+    { intervalMs: POLL_INTERVALS.battery, channel: 'battery', collect: () => collectBattery(store) },
+    250,
+  );
+
+  scheduler.start(
+    { intervalMs: POLL_INTERVALS.system, channel: 'system', collect: () => collectSystem(store) },
+    300,
   );
 
   return scheduler;

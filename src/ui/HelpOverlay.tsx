@@ -53,6 +53,18 @@ export const SHORTCUTS: ShortcutDef[] = [
     detail: 'Ctrl+C와 동일하게 즉시 종료합니다. 좌측 상단 헤더에도 힌트가 표시됩니다.',
   },
   {
+    keys: 't',
+    label: '테마 변경',
+    desc: '컬러 테마 전환 (Dracula/Nord/Monokai/Solarized)',
+    detail: '대시보드의 색상 테마를 순환 변경합니다. (Dracula → Nord → Monokai → Solarized Dark)',
+  },
+  {
+    keys: 'm / Tab',
+    label: '뷰 모드',
+    desc: '뷰 레이아웃 전환 (Grid/Compact/CPU/Process)',
+    detail: '대시보드 뷰 레이아웃을 전환합니다. (전체 종합 Grid → 미니 Compact → CPU 집중 → 프로세스 집중)',
+  },
+  {
     keys: '1 ~ 4',
     label: '프로세스 정렬',
     desc: '프로세스 목록 정렬 기준 변경',
