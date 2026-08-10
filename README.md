@@ -19,6 +19,9 @@
 
 React 기반 TUI 프레임워크 **Ink**로 제작된 터미널 UI와 **systeminformation** 기반의 실시간 메트릭 수집 조합으로, CPU·메모리·디스크·네트워크·프로세스를 0.5~3초 간격으로 갱신합니다.
 
+<p align="center">
+  <img src="./mypcmonitor.gif" alt="mypcmonitor demo" width="100%"/>
+</p>
 
 ## 주요 기능
 
